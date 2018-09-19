@@ -1,0 +1,36 @@
+version: '3'
+services:
+  webserver:
+    image: nginx:latest
+    ports:
+      - "${PRST_WEBSERVER_PORT}:80"
+    volumes:
+      - ./projects:/app
+      - ./nginx:/etc/nginx/conf.d
+    working_dir: /app
+    networks:
+      - back-tier
+
+  php:
+    build: ./docker/php${PRST_PHP_VERSION}
+    volumes:
+      - ./projects:/app
+      - ./scripts:/scripts
+    env_file:
+      - .env
+    working_dir: /
+    networks:
+      - back-tier
+
+  mysql:
+    image: mysql
+    ports:
+      - "${PRST_MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - back-tier
+
+networks:
+  back-tier:
+    driver: bridge
